@@ -24,4 +24,5 @@ function CovenantParty:OnMsgReceived(_, msg, _, sender)
     CovenantParty:Print(player .. " has sent your Addon a message.")
 end
 
+-- Register Communication
 CovenantParty:RegisterComm("CovenantParty", "OnMsgReceived")
