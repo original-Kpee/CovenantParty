@@ -127,8 +127,8 @@ local __LDB = LibStub("LibDataBroker-1.1")
             ReloadUI()
         end,
         OnTooltipShow = function(_)
-            _:AddLine("Covenant Party "..CovenantParty.version, 1, 1, 1);
-            _:AddLine(" ");
+            _:AddLine("Covenant Party "..CovenantParty.version, 1, 1, 1)
+            _:AddLine(" ")
             _:AddLine(CovenantParty.L.MinimapTooltip)
         end
     })
