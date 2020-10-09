@@ -2,8 +2,7 @@
 ## Title: Covenant Party
 ## Notes: Party/Raid covenant indicator and ability tracker
 ## Author: kPee
-## SavedVariables: CovenantParty_SV
-## SavedVariablesPerCharacter: CovenantParty_SVperChar
+## SavedVariables: CovenantPartyDB
 ## OptionalDeps: Ace3, LibSharedMedia-3.0, LibWindow-1.1, LibDBIcon-1.0, NickTag-1.0, LibDataBroker-1.1, LibItemUpgradeInfo-1.0, LibGroupInSpecT-1.1, LibCompress, LibGraph-2.0
 #@no-lib-strip@
 Libs\libs.xml
@@ -12,11 +11,3 @@ Libs\libs.xml
 locales\CovenantParty-enUS.lua
 
 init.lua
-constants.lua
-
-functions\sharedvariables.lua
-functions\utility.lua
-functions\covenant.lua
-functions\communications.lua
-
-covenantparty.lua

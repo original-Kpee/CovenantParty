@@ -48,7 +48,6 @@ function CovenantParty:GROUP_ROSTER_UPDATE()
 end
 
 function CovenantParty:COVENANT_CHOSEN()
-    CovenantParty:GetCovenantData()
-    CovenantParty:Print("Hey")
-    LoadAndCheckTable(CovenantParty.default_player_data, CovenantParty_SVperChar)
+    CovenantParty:GetCovenantData()    
+    CovenantParty:LoadAndCheckTable(CovenantParty.default_player_data, CovenantParty_SVperChar)
 end
