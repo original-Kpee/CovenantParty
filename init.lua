@@ -25,7 +25,7 @@ CovenantParty.minimapIcon = {}
 
 CovenantParty.messageTypes = {
     version = "__V",
-    versionRequest = "__VR"
+    versionRequest = "__VR",
     shareCovenant = "__SC"
 }
 
