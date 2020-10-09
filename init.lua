@@ -77,7 +77,7 @@ local __LDB = LibStub("LibDataBroker-1.1")
                     animaGemsFullSoundKit = ...,
                     animaNewGemSoundKit = ...,
                     animaReinforceSelectSoundKit = ...,
-                    name = ..,                    
+                    name = ...,                    
                     last_betrayal = ...,
                     total_betrayals = 0,
                 }
