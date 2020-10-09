@@ -47,7 +47,7 @@ local __LDB = LibStub("LibDataBroker-1.1")
         local expansion, majorPatch, minorPatch = (version or "9.0.0"):match("^(%d+)%.(%d+)%.(%d+)")
 
         -- Check version for support
-        if expansion not 9 then
+        if expansion ~= 9 then
             CovenantParty.passVersionCheck = false
         else
             local standarized_version = math.floor((expansion * 10,000) + (majorPatch * 100) + (minorPatch))
