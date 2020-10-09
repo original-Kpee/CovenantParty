@@ -1,5 +1,5 @@
-local covenantParty = _G.CovenantParty
-local L = LibStub("AceLocale-3.0"):GetLocale("CovenantParty", true)
+local CovenantParty_name, CovenantParty = ...
 
-covenantParty.ADDON_VERSION_MAJOR = "alpha_0.0"
-covenantParty.ADDON_VERSION_MINOR = "0"
+--> Version Constants
+    CovenantParty.ADDON_VERSION_MAJOR = "alpha_0.0"
+    CovenantParty.ADDON_VERSION_MINOR = "0"

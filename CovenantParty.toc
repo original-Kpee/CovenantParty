@@ -10,4 +10,5 @@ Libs\libs.xml
 
 locales\CovenantParty-enUS.lua
 
+constants.lua
 init.lua
