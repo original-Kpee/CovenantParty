@@ -111,7 +111,7 @@ local __LDB = LibStub("LibDataBroker-1.1")
     __LDB:NewDataObject("CovenantParty", {
         type = "launcher",
         text = "Covenant Party",
-        icon =  __LDB.icon = "Interface\\Addon\\CovenantParty\\images\\covenantparty",
+        icon =  "Interface\\Addon\\CovenantParty\\images\\covenantparty",
         OnClick = function(self, button)
             if button == "LeftButton" then
                 -- Enable Addon (if not already enabled)
