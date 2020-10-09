@@ -50,7 +50,7 @@ local __LDB = LibStub("LibDataBroker-1.1")
         if expansion ~= 9 then
             CovenantParty.passVersionCheck = false
         else
-            local standarized_version = math.floor((expansion * 10,000) + (majorPatch * 100) + (minorPatch))
+            local standarized_version = math.floor((expansion * 10000) + (majorPatch * 100) + (minorPatch))
             if standarized_version == toc_version then
                 CovenantParty.needsAddonUpdate = false
             else
