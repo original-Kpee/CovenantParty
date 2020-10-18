@@ -52,30 +52,36 @@ CovenantParty.G = {
                 CovenantPartyDB["char"]["covenantData"][key] = value
             end
 
-        elseif event == "PLAYER_LOGIN" then    
-            --> Check player covenant selection
-            -- if CovenantPartyDB["char"]["covenantData"]["covenantID"] ==  0 then
-            local covenantInfo = CovenantParty.U.GetCovenantData()
+        elseif event == "PLAYER_LOGIN" then
+            --> Make sure that SharedVariables are not nil
+            if CovenantPartyDB == nil then
+                return
 
-            if covenantInfo == nil then
-                --> No covenant has been selected. Register event for
-                -->> when player decided to choose a covenant
-                self:RegisterEvent("COVENANT_CHOSEN")
+            else
+                --> Check player covenant selection
+                -- if CovenantPartyDB["char"]["covenantData"]["covenantID"] ==  0 then
+                local covenantInfo = CovenantParty.U.GetCovenantData()
 
-                --> Ensure that SharedVariables is back to default
-                -->> for this player
-                for key, value in pairs(CovenantParty.defaults) do
-                    if key == "char" then
-                        for charKey, charValue in pairs(value) do
-                            CovenantPartyDB["char"][charKey] = charValue
+                if covenantInfo == nil then
+                    --> No covenant has been selected. Register event for
+                    -->> when player decided to choose a covenant
+                    self:RegisterEvent("COVENANT_CHOSEN")
+
+                    --> Ensure that SharedVariables is back to default
+                    -->> for this player
+                    for key, value in pairs(CovenantParty.defaults) do
+                        if key == "char" then
+                            for charKey, charValue in pairs(value) do
+                                CovenantPartyDB["char"][charKey] = charValue
+                            end
                         end
                     end
-                end
-            else
-                for key, value in pairs(covenantInfo) do
-                    CovenantPartyDB["char"]["covenantData"][key] = value
-                end
+                else
+                    for key, value in pairs(covenantInfo) do
+                        CovenantPartyDB["char"]["covenantData"][key] = value
+                    end
 
+                end
             end
 
         elseif event == "CHAT_MSG_ADDON" then

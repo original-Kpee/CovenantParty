@@ -31,7 +31,7 @@ CovenantParty.L = LibStub("AceLocale-3.0"):GetLocale("CovenantParty", true)
                 animaGemsFullSoundKit = 0,
                 animaNewGemSoundKit = 0,
                 animaReinforceSelectSoundKit = 0,
-                name = "None",                    
+                name = "None",
                 last_betrayal = "None",
                 total_betrayals = 0,
             }
@@ -65,7 +65,7 @@ local __LDB = LibStub("LibDataBroker-1.1"):NewDataObject("CovenantParty", {
         elseif button == "RightButton" then
             --> Disable Adddon (if not already disabled)
             if  CovenantParty.addonEnabled then
-                DisableAddOn("CovenantParty")                    
+                DisableAddOn("CovenantParty")
             end
         end
         CovenantParty.addonEnabled = not CovenantParty.addonEnabled
@@ -73,9 +73,13 @@ local __LDB = LibStub("LibDataBroker-1.1"):NewDataObject("CovenantParty", {
     end,
     OnTooltipShow = function(_)
         _:AddLine("Covenant Party", 1, 1, 1)
-        _:AddLine("version: "..CovenantParty.version, 0,2,1,1)
+        _:AddLine(CovenantParty.L.Version  ..": "..CovenantParty.version, 0,2,1,1)
         _:AddLine(" ")
-        _:AddLine(CovenantParty.L.MinimapTooltip)
+        _:AddLine(CovenantParty.L.MinimapTooltip["lineOne"])
+        _:AddLine(CovenantParty.L.MinimapTooltip["lineTwo"])
+        _:AddLine(CovenantParty.L.MinimapTooltip["lineThree"])
+        _:AddLine(CovenantParty.L.MinimapTooltip["lineFour"])
+        _:AddLine(CovenantParty.L.MinimapTooltip["lineFive"])
     end
 })
 
@@ -208,7 +212,7 @@ local __LDB = LibStub("LibDataBroker-1.1"):NewDataObject("CovenantParty", {
     CovenantParty.frame:SetScript("OnEvent", function(self, event, ...)
         if event == "ADDON_LOADED" and CovenantParty.addonEnabled == true then
             local addonName = ...
-            if addonName ~= GlobalAddonName then
+            if addonName ~= CovenantPartyGlobal then
                 return
             end
             
@@ -216,7 +220,7 @@ local __LDB = LibStub("LibDataBroker-1.1"):NewDataObject("CovenantParty", {
                         
             --> Ensure that SharedVariables contain all the
             -->>  expected data defined in the 'default' var.
-            for key, value in pairs(CovenantParty.defaults) do
+            for key, value in pairs(CovenantParty.defaults) do                
                 if CovenantPartyDB[key] == nil then
                     CovenantPartyDB[key] = value
                 elseif type(value) == "table" then

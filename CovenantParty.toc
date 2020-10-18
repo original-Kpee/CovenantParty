@@ -8,9 +8,10 @@
 Libs\libs.xml
 #@end-no-lib-strip@
 
+constants.lua
+
 locales\CovenantParty-enUS.lua
 
-constants.lua
 utility.lua
 
 init.lua

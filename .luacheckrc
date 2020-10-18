@@ -19,5 +19,8 @@ globals = {
 	-- Third Party Libraries
 	"LibStub"
 	
-	-- 
+	-- WoW API
+	"LoadAddON",
+	"DisableAddOn",
+	"ReloadUI"
 }
