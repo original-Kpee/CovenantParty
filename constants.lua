@@ -1,9 +1,8 @@
-local CovenantParty_name, CovenantParty = ...
+local CovenantPartyGlobal, CovenantParty = ...
 
 --> Version Constants
     CovenantParty.ADDON_VERSION_MAJOR = "alpha_0.0"
     CovenantParty.ADDON_VERSION_MINOR = "0"
-
     
 --> Text Beautification
     CovenantParty.COLORS = {        

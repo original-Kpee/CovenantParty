@@ -1,6 +1,6 @@
 -- Updated 10/12/2020
 --  by kPee
-local GlobalAddonName, CovenantParty = ...
+local CovenantPartyGlobal, CovenantParty = ...
 
 CovenantParty.G = {
     group = {},
@@ -89,8 +89,7 @@ CovenantParty.G = {
             if prefix and CovenantParty.M.messageAddonPrefix[prefix] then
                 --> If it is (prefix is "SL_COPA") call handler
                 CovenantParty.M.parsedData = CovenantParty.U.ParseAddOnMsg(message, distribution_type)
-
-
+                print(CovenantParty.M.parsedData)
             end
 
         end

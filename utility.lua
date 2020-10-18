@@ -1,6 +1,6 @@
 --> Last Update 10.09.2020
 -->>  by kPee
-local GlobalAddonName, CovenantParty = ...
+local CovenantPartyGlobal, CovenantParty = ...
 
 CovenantParty.U = {}
 

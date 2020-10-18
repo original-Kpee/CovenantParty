@@ -1,7 +1,7 @@
 --> Last Updated 10.08.2020
 -->>  by kPee
 
-local GlobalAddonName, CovenantParty = ...
+local CovenantPartyGlobal, CovenantParty = ...
 
 CovenantParty.version = CovenantParty.ADDON_VERSION_MAJOR .. CovenantParty.ADDON_VERSION_MINOR
 CovenantParty.passVersionCheck = false
@@ -169,7 +169,7 @@ local __LDB = LibStub("LibDataBroker-1.1"):NewDataObject("CovenantParty", {
                 )
             end
         
-        elseif arg == "auto\ reload" then
+        elseif arg == "auto reload" then
                 CovenantParty.autoReload  = not CovenantParty.autoReload
             
             if CovenantParty.autoReload == true then
