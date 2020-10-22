@@ -1,7 +1,7 @@
 local CovenantPartyGlobal, CovenantParty = ...
 
-local L = LibStub("AceLocale-3.0"):NewLocale("CovenantParty", "enUS", true) 
-if not L then return end 
+local L = LibStub("AceLocale-3.0"):NewLocale("CovenantParty", "enUS", true)
+if not L then return end
 
 --> Minimap
     L.Version = "version"

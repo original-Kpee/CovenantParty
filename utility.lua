@@ -16,10 +16,9 @@ do
         if type(text) ~= "table" then
             return
         else
-            local args = {...}
             local fullTextString = ...
 
-            -- Assign the required first text for 
+            -- Assign the required first text for
             --  function call
             fullTextString = CovenantParty.STARTLINE..text["color"]..text["text"]..CovenantParty.ENDLINE
 
@@ -38,26 +37,28 @@ end
 
 
 --> Communication Functions
-    function CovenantParty.U.ParseAddOnMsg(message, distribution_type)
-
+    function CovenantParty.U.ParseAddOnMsg(message, distribution_type, sender)
         -->> Message format: SL_COPA <type> \t <payload>
         local messageType, payload = strsplit("\t", message)
 
         --> Version
-        if messageType == CovenantParty.MESSAGETYPE["VERSION"] then
+        if tonumber(messageType) == CovenantParty.MESSAGETYPE["VERSION"] then
             print("VERSION Received.")
         --> Covenant
-        elseif messageType == CovenantParty.MESSAGETYPE["COVENANT"] then
-            print("COVENANT Received")            
-        end        
+        elseif tonumber(messageType) == CovenantParty.MESSAGETYPE["COVENANT"] then
+            if payload == "request" then
+                C_ChatInfo.SendAddonMessage(CovenantParty.MESSAGE_PREFIX, CovenantParty.MESSAGETYPE["COVENANT"] .. "\t" .. CovenantPartyDB["char"]["covenantData"]["ID"], "WHISPER", sender)
+                return
+            end
+        end
 
-        return messageType, payload
+        return messageType, tonumber(payload)
     end
 
 --> Covenant Functions
     function CovenantParty.U.GetCovenantData()
-        local covenantID = C_Covenants.GetActiveCovenantID()        
-        if characterCovenantID ~= 0 then
+        local covenantID = C_Covenants.GetActiveCovenantID()
+        if covenantID ~= 0 then
             local covenantData = nil
             covenantData = C_Covenants.GetCovenantData(covenantID)
             return covenantData
@@ -77,7 +78,7 @@ end
     function CovenantParty.U.CheckAndStorePartyMemberVersion(name, version)
         local versionStatus = "degrated"
 
-        if version ==  CovenantParty.ADDON_VERSION_MAJOR .. CovenantParty.ADDON_VERSION_MINOR then
+        if version ==  CovenantParty.ADDON_VERSION_MAJOR .. CovenantParty.ADDON_VERSION_MINOR .. CovenantParty.ADDON_VERSION_PATCH then
             versionStatus = "up-to-date"
         end
 

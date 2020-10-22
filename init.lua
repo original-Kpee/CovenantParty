@@ -3,7 +3,7 @@
 
 local CovenantPartyGlobal, CovenantParty = ...
 
-CovenantParty.version = CovenantParty.ADDON_VERSION_MAJOR .. CovenantParty.ADDON_VERSION_MINOR
+CovenantParty.version = CovenantParty.ADDON_VERSION_MAJOR .. CovenantParty.ADDON_VERSION_MINOR .. CovenantParty.ADDON_VERSION_PATCH
 CovenantParty.passVersionCheck = false
 CovenantParty.needsAddonUpdate = false
 CovenantParty.addonEnabled = true
@@ -11,7 +11,7 @@ CovenantParty.addonEnabled = true
 CovenantParty.M = {}
 
 CovenantParty.M.messageAddonPrefix = {
-    [CovenantParty.MESSAGE_PREFIX] = true 
+    [CovenantParty.MESSAGE_PREFIX] = true
 }
 
 CovenantParty.M.parsedData = {}
@@ -36,20 +36,20 @@ CovenantParty.L = LibStub("AceLocale-3.0"):GetLocale("CovenantParty", true)
                 total_betrayals = 0,
             }
         },
-        profile = 
+        profile =
         {
             minimap = {
                 hide = false
             },
             autoReload = false,
         },
-        global = 
+        global =
         {
             region = GetLocale()
         },
     }
 
---> Minimap Icon with LibDBIcon 1.0 
+--> Minimap Icon with LibDBIcon 1.0
 -->>  and Library Data Broker Support with LibDataBroker 1.1
 local __icon = LibStub("LibDBIcon-1.0")
 local __LDB = LibStub("LibDataBroker-1.1"):NewDataObject("CovenantParty", {
@@ -72,7 +72,7 @@ local __LDB = LibStub("LibDataBroker-1.1"):NewDataObject("CovenantParty", {
         ReloadUI()
     end,
     OnTooltipShow = function(_)
-        _:AddLine("Covenant Party", 1, 1, 1)
+        _:AddLine("Covenant Party!", 1, 1, 1)
         _:AddLine(CovenantParty.L.Version  ..": "..CovenantParty.version, 0,2,1,1)
         _:AddLine(" ")
         _:AddLine(CovenantParty.L.MinimapTooltip["lineOne"])
@@ -86,7 +86,7 @@ local __LDB = LibStub("LibDataBroker-1.1"):NewDataObject("CovenantParty", {
 --> Version
     do
         --> Get WoW current version
-        local version, build, build_date, toc_version = GetBuildInfo()
+        local version, _, _, toc_version = GetBuildInfo()
 
         --> Only supports WoW Expansion 9.0 and above (Shadowlands)
         local expansion, majorPatch, minorPatch = (version or "9.0.0"):match("^(%d+)%.(%d+)%.(%d+)")
@@ -112,24 +112,20 @@ local __LDB = LibStub("LibDataBroker-1.1"):NewDataObject("CovenantParty", {
         if CovenantPartyDB.profile.minimap.hide then
             __icon.Hide()
         else
-            if CovenantPartyDB.char[covenantId] ~= 0 then
-                __LDB.icon = 'Interface\\AddOns\\CovenantParty\\images\\covenantparty'
-            else
-                __LDB.icon = 'Interface\\AddOns\\CovenantParty\\images\\covenantparty'                            
-            end          
-            __icon.Show()  
+            __LDB.icon = 'Interface\\AddOns\\CovenantParty\\images\\covenantparty'
+            __icon.Show()
         end
-        
+
         if CovenantPartyDB.autoReload then
             ReloadUI()
         end
     end
 
 --> Slash Command(s)
-    SlashCmdList["CovenantPartySlash"] = function(arg)        
+    SlashCmdList["CovenantPartySlash"] = function(arg)
         if arg == "hide" then
             CovenantPartyDB.profile.minimap.hide = true
-        
+
             __icon.Hide()
 
             if CovenantParty.autoReload then
@@ -143,10 +139,10 @@ local __LDB = LibStub("LibDataBroker-1.1"):NewDataObject("CovenantParty", {
                     {color = CovenantParty.COLORS["BLACK"], text = "on the next UI reload. "}
                 )
             end
-            
-        elseif arg == "show" then            
+
+        elseif arg == "show" then
             CovenantPartyDB.profile.minimap.hide = false
-        
+
             __icon.Show()
 
             if CovenantParty.autoReload then
@@ -172,10 +168,10 @@ local __LDB = LibStub("LibDataBroker-1.1"):NewDataObject("CovenantParty", {
                     {color = CovenantParty.COLORS["BLUE"], text = CovenantParty.version}
                 )
             end
-        
+
         elseif arg == "auto reload" then
                 CovenantParty.autoReload  = not CovenantParty.autoReload
-            
+
             if CovenantParty.autoReload == true then
                 CovenantParty.U.Print(
                     {color = CovenantParty.COLORS["PINK"], text = "Covenant Party"},
@@ -215,23 +211,21 @@ local __LDB = LibStub("LibDataBroker-1.1"):NewDataObject("CovenantParty", {
             if addonName ~= CovenantPartyGlobal then
                 return
             end
-            
+
             CovenantPartyDB = CovenantPartyDB or {}
-                        
+
             --> Ensure that SharedVariables contain all the
             -->>  expected data defined in the 'default' var.
-            for key, value in pairs(CovenantParty.defaults) do                
+            for key, value in pairs(CovenantParty.defaults) do
                 if CovenantPartyDB[key] == nil then
                     CovenantPartyDB[key] = value
-                elseif type(value) == "table" then
-                    
                 end
             end
 
             --> Check default values against SharedVariable to ensure
             -->>  all default values exist within the SharedVariable
             for key, value in pairs(CovenantParty.defaults) do
-                if CovenantPartyDB[key] == nil then                
+                if CovenantPartyDB[key] == nil then
                     CovenantPartyDB[key] = value
                 else
                     --> Key already exists in new table
@@ -240,7 +234,7 @@ local __LDB = LibStub("LibDataBroker-1.1"):NewDataObject("CovenantParty", {
                     -->> look at all of its key to ensure that
                     -->> they exist.
                     if type(value) == "table" then
-                        for inner_key, inner_value in pairs(value) do                        
+                        for inner_key, inner_value in pairs(value) do
                             if CovenantPartyDB[key][inner_key] == nil then
                                 CovenantPartyDB[key][inner_key] = inner_value
                             else
@@ -254,7 +248,6 @@ local __LDB = LibStub("LibDataBroker-1.1"):NewDataObject("CovenantParty", {
                                     end
                                 end
                             end
-                            
                         end
                     end
                 end
@@ -264,7 +257,7 @@ local __LDB = LibStub("LibDataBroker-1.1"):NewDataObject("CovenantParty", {
             -->>  does not contain any stale data that is no longer
             -->>  defined within our 'defaults' var
             for key, value in pairs(CovenantPartyDB) do
-                if CovenantParty.defaults[key] == nil then                
+                if CovenantParty.defaults[key] == nil then
                     CovenantPartyDB[key] = nil
                 else
                     --> Key already exists in new table
@@ -273,32 +266,31 @@ local __LDB = LibStub("LibDataBroker-1.1"):NewDataObject("CovenantParty", {
                     -->>  look at all of its key to ensure that
                     -->>  they exist.
                     if type(value) == "table" then
-                        for inner_key, inner_value in pairs(value) do                        
+                        for inner_key, inner_value in pairs(value) do
                             if CovenantParty.defaults[key][inner_key] == nil then
                                 CovenantPartyDB[key][inner_key] = nil
                             else
                                 --> Last nested table check
                                 -->  This only supporst up to three nested tables
                                 if type(inner_value) == "table" then
-                                    for deeper_key, deeper_value in pairs(inner_value) do
+                                    for deeper_key, _ in pairs(inner_value) do
                                         if CovenantParty.defaults[key][inner_key][deeper_key] == nil then
                                             CovenantPartyDB[key][inner_key][deeper_key] = nil
                                         end
                                     end
                                 end
                             end
-                            
                         end
                     end
                 end
             end
-              
+
 
             CovenantParty.autoRelaod = CovenantPartyDB.profile.autoReload
 
             --> Initialize auto reload from profile
             CovenantParty.autoReload =  CovenantPartyDB.profile.autoReload
-            
+
             if not CovenantParty.U.UTILITY_FILE_LOADED then
                 print(
                     CovenantParty.COLORS["PINK"].."Covenant Party"..":"..
@@ -311,10 +303,10 @@ local __LDB = LibStub("LibDataBroker-1.1"):NewDataObject("CovenantParty", {
             for _prefix, _ in pairs(CovenantParty.M.messageAddonPrefix) do
                 C_ChatInfo.RegisterAddonMessagePrefix(_prefix)
             end
-        
+
             --> Register the Minimap Icon
             __icon:Register("CovenantParty", __LDB, CovenantPartyDB.profile.minimap)
-            
+
 
             --> Unregister the ADDON_LOADED event
             self:UnregisterEvent("ADDON_LOADED")

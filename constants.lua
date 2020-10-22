@@ -1,11 +1,13 @@
 local CovenantPartyGlobal, CovenantParty = ...
 
 --> Version Constants
-    CovenantParty.ADDON_VERSION_MAJOR = "alpha_0.0"
+    --> [major].[minor].[patch] - [a,b,rc].[build]
+    CovenantParty.ADDON_VERSION_MAJOR = "alpha_"
     CovenantParty.ADDON_VERSION_MINOR = "0"
-    
+    CovenantParty.ADDON_VERSION_PATCH = 0
+
 --> Text Beautification
-    CovenantParty.COLORS = {        
+    CovenantParty.COLORS = {
         LIGHT_BLUE = 'cff00ccff',
         LIGHT_RED = 'cffff6060',
         RED = 'cffFF0000',
@@ -27,3 +29,13 @@ local CovenantPartyGlobal, CovenantParty = ...
     }
 
     CovenantParty.MESSAGE_PREFIX = "SL_COPA"
+
+    CovenantParty.SIGILS = {
+        kyrian = {28, 42},
+        venthyr = {35, 37},
+        nightfae = {32, 32},
+        necrolords = {40, 48}
+    }
+
+    CovenantParty.PlayerFrameLocation = {-70, 25}
+    CovenantParty.TargetFrameLocation = {70, 25}
