@@ -37,5 +37,5 @@ local CovenantPartyGlobal, CovenantParty = ...
         necrolords = {40, 48}
     }
 
-    CovenantParty.PlayerFrameLocation = {-70, 25}
-    CovenantParty.TargetFrameLocation = {70, 25}
+    CovenantParty.PlayerFrameLocation = {-78, 10}
+    CovenantParty.TargetFrameLocation = {78, 10}

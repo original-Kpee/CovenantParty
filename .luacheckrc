@@ -54,5 +54,7 @@ globals = {
 	"UnitExists",
 	"UnitIsPlayer",
 	"UIParent",
-	"TargetFrame"
+	"TargetFrame",
+	UnitFactionGroup",
+	"HIGH"
 }
