@@ -31,11 +31,11 @@ local CovenantPartyGlobal, CovenantParty = ...
     CovenantParty.MESSAGE_PREFIX = "SL_COPA"
 
     CovenantParty.SIGILS = {
-        kyrian = {28, 42},
+        kyrian = {28, 46},
         venthyr = {35, 37},
         nightfae = {32, 32},
         necrolords = {40, 48}
     }
 
-    CovenantParty.PlayerFrameLocation = {-78, 10}
+    CovenantParty.PlayerFrameLocation = {-79, 12}
     CovenantParty.TargetFrameLocation = {78, 10}

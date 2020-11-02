@@ -3,66 +3,36 @@
 local CovenantPartyGlobal, CovenantParty = ...
 
 --> Local Var(s)
-    local _previewsTarget = _previewsTarget
-    local _currentTarget = _currentTarget
-    local _currentGroup = {}
-    local _newGroup = {}    
+local _previewsTarget = _previewsTarget
+local _currentTarget = _currentTarget 
+local _joinedGroup = false
+
+CovenantParty.currentGroup = {}
+CovenantParty.newGroup = {}
 
 CovenantParty.T = {targetFrame = CreateFrame("Frame", nil, TargetFrame)}
 CovenantParty.P = {playerFrame = CreateFrame("Frame", nil, PlayerFrame)}
-CovenantParty.G = {
-    group = {},
-    newGroup = {}
-}
-
-CovenantParty.G.playerTextures = {}
+CovenantParty.G = {groupFrame = CreateFrame("Frame", nil, CompactPartyFrame)}
 
 --> OnEvent Frame 
-    CovenantParty.onEventFrame = CreateFrame("Frame", nil, UIParent)
-    CovenantParty.onEventFrame:SetScript("OnEvent", function(self, event,...)
-        if event == "GROUP_ROSTER_UPDATE" then
-            CovenantParty.G["group"] = CovenantParty.G["newGroup"]
-            CovenantParty.G["newGroup"] = {}
+    -- CovenantParty.onEventFrame = CreateFrame("Frame", nil, UIParent)
+    CovenantParty.frame:SetScript("OnEvent", function(self, event,...)
+        if event == "GROUP_ROSTER_UPDATE" then 
+            
+            if IsInGroup() and _joinedGroup == false then
+                CovenantParty:CreateCovenantSigil("party", CovenantPartyDB["char"]["covenantData"]["ID"], CompactPartyFrameMember1) 
+                _joinedGroup = true
+            end   
 
             if not IsInGroup() then
+                print("You are not in a group.")
+                _joinedGroup = false
                 return
             end
+            
+            CovenantParty.U.UpdateGroupList()
 
-            local numbOfGroupMembers = GetNumGroupMembers()
-
-            --> Add all the names of the group members
-            -->> to internal table
-            if not IsInRaid() then
-                for countEachMember = 1, numbOfGroupMembers do
-                    local name = GetUnitName("party"..countEachMember, true)
-
-                    if name and name ~= UNKNOWN then
-                        CovenantParty.G["newGroup"][name]= countEachMember
-                    end
-                end
-            end
-
-            --> Check if the change in roster was a move or a join
-            for name, _ in pairs(CovenantParty.G["newGroup"]) do
-                if not CovenantParty.G["group"] then
-                    --> This play were not in the group previewsly
-                    -->> Send your covenant and version to the new player
-                    C_ChatInfo.SendAddonMessage(CovenantParty.MESSAGE_PREFIX, CovenantParty.MESSAGETYPE["VERSION"] .. "\t" .. CovenantParty.ADDON_VERSION_MAJOR .. CovenantParty.ADDON_VERSION_MINOR .. CovenantParty.ADDON_VERSION_PATCH, "WHISPER", name)
-                    C_ChatInfo.SendAddonMessage(CovenantParty.MESSAGE_PREFIX, CovenantParty.MESSAGETYPE["COVENANT"] .. "\t" .. CovenantPartyDB["char"]["covenantData"]["covenantID"], "WHISPER", name)
-                end
-            end
-
-            --> Check if the change in roster was somone leaving the group
-            for name, index in pairs(CovenantParty.G["group"]) do
-                if not CovenantParty.G["newGroup"] then
-                    -->>                  TODO                   <<--
-                    --> Place holder: Need to update raid frames. <--
-                    -->>                  TODO                   <<--
-                end
-            end
-
-            CovenantParty.onEventFrame:Show()
-
+        
         elseif event == "COVENANT_CHOSEN" then
             --> During initalization the AddOn discovered that
             -->> the player had not choosen a covenant yet.
@@ -77,14 +47,16 @@ CovenantParty.G.playerTextures = {}
                 CovenantPartyDB["char"]["covenantData"][key] = value
             end
 
-            CovenantParty:DisplayCovenantSigil(UnitName("player"), CovenantPartyDB["char"]["covenantData"]["ID"], PlayerFrame)
+            CovenantParty:CreateCovenantSigil(UnitName("player"), CovenantPartyDB["char"]["covenantData"]["ID"], PlayerFrame)
 
         elseif event == "PLAYER_LOGIN" then
+            
             --> Make sure that SharedVariables are not nil
             if CovenantPartyDB == nil then
                 return
 
             else
+                
                 --> Check player covenant selection
                 -- if CovenantPartyDB["char"]["covenantData"]["covenantID"] ==  0 then
                 local covenantInfo = CovenantParty.U.GetCovenantData()
@@ -111,8 +83,10 @@ CovenantParty.G.playerTextures = {}
                 end
             end
 
-            CovenantParty:DisplayCovenantSigil(UnitName("player"), CovenantPartyDB["char"]["covenantData"]["ID"], PlayerFrame)
+            CovenantParty:CreateCovenantSigil(UnitName("player"), CovenantPartyDB["char"]["covenantData"]["ID"], PlayerFrame)
 
+            CovenantParty:DisplayRaidPartySigils()
+            
         elseif event == "CHAT_MSG_ADDON" then
             --> As per WoW API the CHAT_MSG_ADDON fires when a message
             -->> is received from SendAddonMessage(). The Addon prefix
@@ -124,16 +98,23 @@ CovenantParty.G.playerTextures = {}
             --> If it is (prefix is "SL_COPA") call handler
             -->> CovenantParty.M.messageType, CovenantParty.M.payload
             if prefix and CovenantParty.M.messageAddonPrefix[prefix] then
+                local _, payload = CovenantParty.U.ParseAddOnMsg(message, distribution_type, sender)
                 if distribution_type == "WHISPER" then
-
-                    local _, payload = CovenantParty.U.ParseAddOnMsg(message, distribution_type, sender)
                     if payload then
                         if _currentTarget ~= strsplit("-", sender) then 
                             return
                         else                        
-                            CovenantParty:DisplayCovenantSigil("target", payload, TargetFrame)
+                            CovenantParty:CreateCovenantSigil("target", payload, TargetFrame)
                         end
-                    end                
+                    end 
+
+                elseif distribution_type == "PARTY" or distribution_type == "INSTANCE" then
+                    if strsplit("-", sender) == UnitName("player") then                    
+                        CovenantParty:CreateCovenantSigil("party", payload, CompactPartyFrameMember1)                        
+                    else
+                        CovenantParty:CreateCovenantSigil("party", payload, CompactPartyFrameMember .. CovenantParty.currentGroup[sender] + 1)
+                        CovenatParty.currentGroup[sender]["covenantID"] = payload
+                    end
                 end
             end
         elseif event == "PLAYER_TARGET_CHANGED" then
@@ -154,12 +135,12 @@ CovenantParty.G.playerTextures = {}
     end
     )
 
---> DisplayCovenantSigil()
+--> CreateCovenantSigil()
     --> Called when player logs in OR when player chooses a covenant. Called when
     -->> a new party member joins the group.
     --> This function creates a texture and displays the players covenant sigil
     -->> on to the relative frame seleced.
-    function CovenantParty:DisplayCovenantSigil(playerIndex, playerCovenant, relativeFrame)
+    function CovenantParty:CreateCovenantSigil(playerIndex, playerCovenant, relativeFrame)
         local covenantAtlas = nil
         local height = 0
         local width = 0
@@ -200,12 +181,36 @@ CovenantParty.G.playerTextures = {}
             CovenantParty.T["texture"]:SetHeight(height)
             CovenantParty.T["texture"]:SetWidth(width)
             CovenantParty.T["texture"]:SetAtlas(covenantAtlas)
+        elseif playerIndex == "party" then
+            print("party frame update.")       
+            CovenantParty.G[string.lower(tostring(relativeFrame))] = CovenantParty.G.groupFrame:CreateTexture("Sigil", "ARTWORK", relativeFrame)
+            CovenantParty.G.groupFrame:SetParent(CompactPartyFrame)
+            CovenantParty.G.groupFrame:SetFrameStrata(HIGH)
+            CovenantParty.G[string.lower(tostring(relativeFrame))]:SetPoint("CENTER", relativeFrame, "CENTER", 0, 0)
+            CovenantParty.G[string.lower(tostring(relativeFrame))]:SetHeight(height)
+            CovenantParty.G[string.lower(tostring(relativeFrame))]:SetWidth(width)
+            CovenantParty.G[string.lower(tostring(relativeFrame))]:SetAtlas(covenantAtlas)
+            CovenantParty.G.groupFrame:Show()
+        end
+    end
+
+    function CovenantParty:DisplayRaidPartySigils()
+        if IsInGroup() then            
+            for key, item in pairs(CovenantParty.currentGroup) do
+                print(key)
+                print(item)
+                for innerKey, innerItem in pairs(item) do
+                    print(" ---------------- ")
+                    print(innerKey)
+                    print(innerItem)
+                end
+            end
         end
     end
 
 --> Register Events
-    CovenantParty.onEventFrame:RegisterEvent("PLAYER_LOGIN")
-    CovenantParty.onEventFrame:RegisterEvent("COVENANT_CHOSEN")
-    CovenantParty.onEventFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
-    CovenantParty.onEventFrame:RegisterEvent("CHAT_MSG_ADDON")
-    CovenantParty.onEventFrame:RegisterEvent("PLAYER_TARGET_CHANGED")
+    CovenantParty.frame:RegisterEvent("PLAYER_LOGIN")
+    CovenantParty.frame:RegisterEvent("COVENANT_CHOSEN")
+    CovenantParty.frame:RegisterEvent("GROUP_ROSTER_UPDATE")
+    CovenantParty.frame:RegisterEvent("CHAT_MSG_ADDON")
+    CovenantParty.frame:RegisterEvent("PLAYER_TARGET_CHANGED")
