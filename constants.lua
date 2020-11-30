@@ -38,4 +38,6 @@ local CovenantPartyGlobal, CovenantParty = ...
     }
 
     CovenantParty.PlayerFrameLocation = {-79, 12}
+    CovenantParty.PlayerFrameLocationPvP = {-49, 42}
     CovenantParty.TargetFrameLocation = {78, 10}
+    CovenantParty.TargetFrameLocationPvP= {58, 40}

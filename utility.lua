@@ -124,6 +124,7 @@ end
                 end
             end
 
+            table.foreach(CovenantParty.currentGroup, print)
             print("-------------- end ----------\n")
         end
         --> Checks if a new member has joined the group

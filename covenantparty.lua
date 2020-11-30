@@ -16,7 +16,10 @@ CovenantParty.G = {groupFrame = CreateFrame("Frame", nil, CompactPartyFrame)}
 
 --> OnEvent Frame 
     -- CovenantParty.onEventFrame = CreateFrame("Frame", nil, UIParent)
-    CovenantParty.frame:SetScript("OnEvent", function(self, event,...)
+    --> Global Frame
+    CovenantParty.mainFrame = CreateFrame("Frame")
+    CovenantParty.mainFrame:SetScript("OnEvent", function(self, event,...)
+
         if event == "GROUP_ROSTER_UPDATE" then 
             
             if IsInGroup() and _joinedGroup == false then
@@ -32,7 +35,6 @@ CovenantParty.G = {groupFrame = CreateFrame("Frame", nil, CompactPartyFrame)}
             
             CovenantParty.U.UpdateGroupList()
 
-        
         elseif event == "COVENANT_CHOSEN" then
             --> During initalization the AddOn discovered that
             -->> the player had not choosen a covenant yet.
@@ -84,8 +86,6 @@ CovenantParty.G = {groupFrame = CreateFrame("Frame", nil, CompactPartyFrame)}
             end
 
             CovenantParty:CreateCovenantSigil(UnitName("player"), CovenantPartyDB["char"]["covenantData"]["ID"], PlayerFrame)
-
-            CovenantParty:DisplayRaidPartySigils()
             
         elseif event == "CHAT_MSG_ADDON" then
             --> As per WoW API the CHAT_MSG_ADDON fires when a message
@@ -131,6 +131,13 @@ CovenantParty.G = {groupFrame = CreateFrame("Frame", nil, CompactPartyFrame)}
             elseif not UnitExists("target") then
                 if CovenantParty.T["texture"] ~= nil then CovenantParty.T["texture"]:Hide() end
             end
+        elseif event == "PLAYER_FLAGS_CHANGED" then
+            if UnitIsPVP("player") then
+                CovenantParty.P["texture"]:SetPoint("CENTER", PlayerFrame, "CENTER", CovenantParty.PlayerFrameLocationPvP[1], CovenantParty.PlayerFrameLocationPvP[2])
+            else
+                -- Move Covenant icon where PvP icon used to be
+                CovenantParty.P["texture"]:SetPoint("CENTER", PlayerFrame, "CENTER", CovenantParty.PlayerFrameLocation[1], CovenantParty.PlayerFrameLocation[2])
+            end
         end
     end
     )
@@ -169,7 +176,13 @@ CovenantParty.G = {groupFrame = CreateFrame("Frame", nil, CompactPartyFrame)}
             CovenantParty.P["texture"] = CovenantParty.P["playerFrame"]:CreateTexture("Sigil","ARTWORK", PlayerFrame)
             CovenantParty.P.playerFrame:SetParent(PlayerFrame)
             CovenantParty.P.playerFrame:SetFrameStrata(HIGH)
-            CovenantParty.P["texture"]:SetPoint("CENTER", relativeFrame, "CENTER", CovenantParty.PlayerFrameLocation[1], CovenantParty.PlayerFrameLocation[2])
+
+            if UnitIsPVP("player") then
+                CovenantParty.P["texture"]:SetPoint("CENTER", relativeFrame, "CENTER", CovenantParty.PlayerFrameLocationPvP[1], CovenantParty.PlayerFrameLocationPvP[2])
+            else
+                CovenantParty.P["texture"]:SetPoint("CENTER", relativeFrame, "CENTER", CovenantParty.PlayerFrameLocation[1], CovenantParty.PlayerFrameLocation[2])
+            end
+
             CovenantParty.P["texture"]:SetHeight(height)
             CovenantParty.P["texture"]:SetWidth(width)
             CovenantParty.P["texture"]:SetAtlas(covenantAtlas)
@@ -177,40 +190,36 @@ CovenantParty.G = {groupFrame = CreateFrame("Frame", nil, CompactPartyFrame)}
             CovenantParty.T["texture"] = CovenantParty.T.targetFrame:CreateTexture("Sigil","ARTWORK")
             CovenantParty.T.targetFrame:SetParent(TargetFrame)
             CovenantParty.T.targetFrame:SetFrameStrata(HIGH)
-            CovenantParty.T["texture"]:SetPoint("CENTER", relativeFrame, "CENTER", CovenantParty.TargetFrameLocation[1], CovenantParty.TargetFrameLocation[2])
+            
+            if UnitIsPVP("player") then
+                CovenantParty.T["texture"]:SetPoint("CENTER", relativeFrame, "CENTER", CovenantParty.TargetFrameLocationPvP[1], CovenantParty.TargetFrameLocationPvP[2])
+            else
+                CovenantParty.T["texture"]:SetPoint("CENTER", relativeFrame, "CENTER", CovenantParty.TargetFrameLocation[1], CovenantParty.TargetFrameLocation[2])
+            end
+
             CovenantParty.T["texture"]:SetHeight(height)
             CovenantParty.T["texture"]:SetWidth(width)
             CovenantParty.T["texture"]:SetAtlas(covenantAtlas)
-        elseif playerIndex == "party" then
-            print("party frame update.")       
-            CovenantParty.G[string.lower(tostring(relativeFrame))] = CovenantParty.G.groupFrame:CreateTexture("Sigil", "ARTWORK", relativeFrame)
-            CovenantParty.G.groupFrame:SetParent(CompactPartyFrame)
-            CovenantParty.G.groupFrame:SetFrameStrata(HIGH)
-            CovenantParty.G[string.lower(tostring(relativeFrame))]:SetPoint("CENTER", relativeFrame, "CENTER", 0, 0)
-            CovenantParty.G[string.lower(tostring(relativeFrame))]:SetHeight(height)
-            CovenantParty.G[string.lower(tostring(relativeFrame))]:SetWidth(width)
-            CovenantParty.G[string.lower(tostring(relativeFrame))]:SetAtlas(covenantAtlas)
-            CovenantParty.G.groupFrame:Show()
-        end
-    end
-
-    function CovenantParty:DisplayRaidPartySigils()
-        if IsInGroup() then            
-            for key, item in pairs(CovenantParty.currentGroup) do
-                print(key)
-                print(item)
-                for innerKey, innerItem in pairs(item) do
-                    print(" ---------------- ")
-                    print(innerKey)
-                    print(innerItem)
-                end
+        elseif playerIndex == "party" then         
+            if CovenantParty.G[string.lower(tostring(relativeFrame))] == nil or CovenantParty.G[string.lower(tostring(relativeFrame))]["active"] == false then
+                print("Generating texture for " .. string.lower(tostring(relativeFrame)))
+                CovenantParty.G[string.lower(tostring(relativeFrame))] = CovenantParty.G.groupFrame:CreateTexture("Sigil", "ARTWORK", relativeFrame)
+                CovenantParty.G.groupFrame:SetParent(CompactPartyFrame)
+                CovenantParty.G.groupFrame:SetFrameStrata(HIGH)
+                CovenantParty.G[string.lower(tostring(relativeFrame))]:SetPoint("CENTER", relativeFrame, "CENTER", 0, 0)
+                CovenantParty.G[string.lower(tostring(relativeFrame))]:SetHeight(height)
+                CovenantParty.G[string.lower(tostring(relativeFrame))]:SetWidth(width)
+                CovenantParty.G[string.lower(tostring(relativeFrame))]:SetAtlas(covenantAtlas)
+                CovenantParty.G.groupFrame:Show()
+                CovenantParty.G[string.lower(tostring(relativeFrame))]["active"] = true
             end
         end
     end
 
 --> Register Events
-    CovenantParty.frame:RegisterEvent("PLAYER_LOGIN")
-    CovenantParty.frame:RegisterEvent("COVENANT_CHOSEN")
-    CovenantParty.frame:RegisterEvent("GROUP_ROSTER_UPDATE")
-    CovenantParty.frame:RegisterEvent("CHAT_MSG_ADDON")
-    CovenantParty.frame:RegisterEvent("PLAYER_TARGET_CHANGED")
+    CovenantParty.mainFrame:RegisterEvent("PLAYER_LOGIN")
+    CovenantParty.mainFrame:RegisterEvent("COVENANT_CHOSEN")
+    CovenantParty.mainFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
+    CovenantParty.mainFrame:RegisterEvent("CHAT_MSG_ADDON")
+    CovenantParty.mainFrame:RegisterEvent("PLAYER_TARGET_CHANGED")
+    CovenantParty.mainFrame:RegisterEvent("PLAYER_FLAGS_CHANGED")

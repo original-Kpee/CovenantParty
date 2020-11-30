@@ -207,6 +207,7 @@ local __LDB = LibStub("LibDataBroker-1.1"):NewDataObject("CovenantParty", {
 
     CovenantParty.frame:SetScript("OnEvent", function(self, event, ...)
         if event == "ADDON_LOADED" and CovenantParty.addonEnabled == true then
+            print(event .. " - Covenant Party!")
             local addonName = ...
             if addonName ~= CovenantPartyGlobal then
                 return

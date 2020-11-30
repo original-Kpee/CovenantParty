@@ -8,6 +8,8 @@ All notable changes to CovenantParty! World of Warcraft AddOn will be documented
         on Target Frame.
     • AddOn messaging tested and working.
 
-0.0.0-a.7
+0.0.0-a.9
     • Fixed in-game message saying "<player name> does not exist" when targeting a player from a different faction.
-    • Fixed incorrectly displaying the Targeted player covenant sigil. 
+    • Fixed incorrectly displaying the Targeted player covenant sigil.
+    • Added PvP support. Toggling war mode will move sigil around player frame.
+    • Finished party support (ready for test). Party members are able to see each other's sigils on Raid Frame style ONLY.
