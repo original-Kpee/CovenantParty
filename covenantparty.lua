@@ -7,6 +7,8 @@ local _previewsTarget = _previewsTarget
 local _currentTarget = _currentTarget 
 local _joinedGroup = false
 
+local countPartyFrame = 1
+
 CovenantParty.currentGroup = {}
 CovenantParty.newGroup = {}
 
@@ -121,11 +123,24 @@ CovenantParty.G = {groupFrame = CreateFrame("Frame", nil, CompactPartyFrame)}
                     end 
 
                 elseif distribution_type == "PARTY" or distribution_type == "INSTANCE" then
-                    if strsplit("-", sender) == UnitName("player") then                    
+
+                    if strsplit("-", sender) == UnitName("player") then  
                         CovenantParty:CreateCovenantSigil("party", payload, CompactPartyFrameMember1)                        
                     else
-                        CovenantParty:CreateCovenantSigil("party", payload, CompactPartyFrameMember .. CovenantParty.currentGroup[sender] + 1)
+
+                        if countPartyFrame == 2 then
+                            CovenantParty:CreateCovenantSigil("party", payload, CompactPartyFrameMember2)
+                        elseif countPartyFrame == 3 then
+                            CovenantParty:CreateCovenantSigil("party", payload, CompactPartyFrameMember3)
+                        elseif countPartyFrame == 4 then
+                            CovenantParty:CreateCovenantSigil("party", payload, CompactPartyFrameMember4)
+                        elseif countPartyFrame == 5 then
+                            CovenantParty:CreateCovenantSigil("party", payload, CompactPartyFrameMember5)
+                        end
+
                         CovenatParty.currentGroup[sender]["covenantID"] = payload
+
+                        countPartyFrame = countPartyFrame + 1
                     end
                 end
             end
@@ -218,7 +233,7 @@ CovenantParty.G = {groupFrame = CreateFrame("Frame", nil, CompactPartyFrame)}
                 CovenantParty.G[string.lower(tostring(relativeFrame))] = CovenantParty.G.groupFrame:CreateTexture("Sigil", "ARTWORK", relativeFrame)
                 CovenantParty.G.groupFrame:SetParent(CompactPartyFrame)
                 CovenantParty.G.groupFrame:SetFrameStrata(HIGH)
-                CovenantParty.G[string.lower(tostring(relativeFrame))]:SetPoint("CENTER", relativeFrame, "TOPRIGHT", 0, 0)
+                CovenantParty.G[string.lower(tostring(relativeFrame))]:SetPoint("CENTER", relativeFrame, "CENTER", -55, 5)
                 CovenantParty.G[string.lower(tostring(relativeFrame))]:SetHeight(height)
                 CovenantParty.G[string.lower(tostring(relativeFrame))]:SetWidth(width)
                 CovenantParty.G[string.lower(tostring(relativeFrame))]:SetAtlas(covenantAtlas)

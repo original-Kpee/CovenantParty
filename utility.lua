@@ -1,6 +1,6 @@
---> Last Update 10.09.2020
--->>  by kPee
 local CovenantPartyGlobal, CovenantParty = ...
+
+local _oldGroup = {}
 
 CovenantParty.U = {}
 
@@ -39,7 +39,7 @@ end
 --> Communication Functions
     function CovenantParty.U.ParseAddOnMsg(message, distribution_type, sender)
         -->> Message format: SL_COPA <type> \t <payload>
-        local messageType, payload = strsplit("\t", message)
+        local messageType, payload, covenantID = strsplit("\t", message)
 
         --> Version
         if tonumber(messageType) == CovenantParty.MESSAGETYPE["VERSION"] then
@@ -48,7 +48,9 @@ end
         elseif tonumber(messageType) == CovenantParty.MESSAGETYPE["COVENANT"] then
             if payload == "request" then
                 C_ChatInfo.SendAddonMessage(CovenantParty.MESSAGE_PREFIX, CovenantParty.MESSAGETYPE["COVENANT"] .. "\t" .. CovenantPartyDB["char"]["covenantData"]["ID"], "WHISPER", sender)
-                return
+                return     
+            elseif payload == "broadcast" then
+                payload = covenantID       
             end
         end
 
@@ -67,24 +69,81 @@ end
         end
     end
 
-    function CovenantParty.U.StorePartyMemberCovenantData(name, covenant)
-        for _name, _ in pairs(CovenantParty.G["group"]) do
-            if _name == name then
-                CovenantParty.G["group"][name]["covenant"] = covenant
+--> Group Utility
+    function CovenantParty.U.UpdateGroupList()
+        local newGroupSize, unit = GetNumGroupMembers(), "raid"
+        if not IsInRaid() then
+            newGroupSize, unit = newGroupSize - 1, "party"
+        end
+        
+        _oldGroup = CovenantParty.currentGroup
+
+        if newGroupSize < #CovenantParty.currentGroup then
+            print("------------------------\n")
+            print("Someone left the group.\n")
+
+            if newGroupSize == 0 then
+                wipe(CovenantParty.currentGroup)
+                return
             end
+
+            table.foreach(_oldGroup, print)
+            print(" - - - - - - -\n")
+            print("Group size is " .. newGroupSize)
+
+            for indexOldGroup, nameOldGroup in ipairs(_oldGroup) do
+                print("Start Check\n\n")
+                for count = 1, newGroupSize do
+                    local partyFrameName = GetUnitName(unit..count, true)
+                    local leftGroup = true
+                    local nameThatLeft = " "
+
+                    print("Checking for " .. partyFrameName)
+                    print("... against " .. nameOldGroup .. "\n")
+
+                    if partyFrameName == nameOldGroup then
+                        print(nameOldGroup .. " is still in the group. \n\n")
+                        leftGroup = false
+                    end
+
+                    nameThatLeft = nameOldGroup
+
+                    if leftGroup == true then 
+                        print(nameThatLeft .. " is not in the group. Let's remove him.")
+                        table.foreach(CovenantParty.currentGroup, function(index, value)
+                            print("Looking at " .. index .. " index with name " .. value)
+                            if value == nameThatLeft then
+                                print(value .. " left the group.\n")
+                                table.remove(CovenantParty.currentGroup, index)
+                                return
+                            end
+                        end)
+                    end
+                end
+            end
+
+            table.foreach(CovenantParty.currentGroup, print)
+            print("-------------- end ----------\n")
         end
-    end
+        --> Checks if a new member has joined the group
+        for newMember = 1, newGroupSize do
+            local newMemberName = GetUnitName(unit..newMember, true)
+            local inGroup = false
 
-    function CovenantParty.U.CheckAndStorePartyMemberVersion(name, version)
-        local versionStatus = "degrated"
+            if newMemberName and newMemberName ~= UNKNOWN then
+                table.foreach(CovenantParty.currentGroup, function(key, value)
+                    if value == newMemberName then
+                        inGroup = true
+                        return
+                    end
+                end)
 
-        if version ==  CovenantParty.ADDON_VERSION_MAJOR .. CovenantParty.ADDON_VERSION_MINOR .. CovenantParty.ADDON_VERSION_PATCH then
-            versionStatus = "up-to-date"
-        end
-
-        for _name, _ in pairs(CovenantParty.G["group"]) do
-            if _name == name then
-                CovenantParty.G["group"][name]["version"] = versionStatus
+                if inGroup == false then
+                    table.insert(CovenantParty.currentGroup, newMemberName)
+                    print(newMemberName .. " inserted into new group.\n")
+                    print("The new group size is " .. #CovenantParty.currentGroup)  
+                    C_ChatInfo.SendAddonMessage(CovenantParty.MESSAGE_PREFIX, CovenantParty.MESSAGETYPE.COVENANT .."\t" .. "broadcast" .. "\t" .. CovenantPartyDB["char"]["covenantData"]["ID"], string.upper(unit))
+                end
             end
         end
     end
