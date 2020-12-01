@@ -86,6 +86,18 @@ CovenantParty.G = {groupFrame = CreateFrame("Frame", nil, CompactPartyFrame)}
             end
 
             CovenantParty:CreateCovenantSigil(UnitName("player"), CovenantPartyDB["char"]["covenantData"]["ID"], PlayerFrame)
+
+            if UnitIsPVP("player") then
+                CovenantParty.P["texture"]:SetPoint("CENTER", PlayerFrame, "CENTER", CovenantParty.PlayerFrameLocationPvP[1], CovenantParty.PlayerFrameLocationPvP[2])
+            else
+                -- Move Covenant icon where PvP icon used to be
+                CovenantParty.P["texture"]:SetPoint("CENTER", PlayerFrame, "CENTER", CovenantParty.PlayerFrameLocation[1], CovenantParty.PlayerFrameLocation[2])
+            end
+
+            if IsInGroup() and _joinedGroup == false then
+                CovenantParty:CreateCovenantSigil("party", CovenantPartyDB["char"]["covenantData"]["ID"], CompactPartyFrameMember1) 
+                _joinedGroup = true
+            end               
             
         elseif event == "CHAT_MSG_ADDON" then
             --> As per WoW API the CHAT_MSG_ADDON fires when a message
@@ -206,7 +218,7 @@ CovenantParty.G = {groupFrame = CreateFrame("Frame", nil, CompactPartyFrame)}
                 CovenantParty.G[string.lower(tostring(relativeFrame))] = CovenantParty.G.groupFrame:CreateTexture("Sigil", "ARTWORK", relativeFrame)
                 CovenantParty.G.groupFrame:SetParent(CompactPartyFrame)
                 CovenantParty.G.groupFrame:SetFrameStrata(HIGH)
-                CovenantParty.G[string.lower(tostring(relativeFrame))]:SetPoint("CENTER", relativeFrame, "CENTER", 0, 0)
+                CovenantParty.G[string.lower(tostring(relativeFrame))]:SetPoint("CENTER", relativeFrame, "TOPRIGHT", 0, 0)
                 CovenantParty.G[string.lower(tostring(relativeFrame))]:SetHeight(height)
                 CovenantParty.G[string.lower(tostring(relativeFrame))]:SetWidth(width)
                 CovenantParty.G[string.lower(tostring(relativeFrame))]:SetAtlas(covenantAtlas)

@@ -31,7 +31,7 @@ local CovenantPartyGlobal, CovenantParty = ...
     CovenantParty.MESSAGE_PREFIX = "SL_COPA"
 
     CovenantParty.SIGILS = {
-        kyrian = {28, 46},
+        kyrian = {25, 44},
         venthyr = {35, 37},
         nightfae = {32, 32},
         necrolords = {40, 48}

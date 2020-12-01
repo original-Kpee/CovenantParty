@@ -23,7 +23,7 @@ CovenantParty.L = LibStub("AceLocale-3.0"):GetLocale("CovenantParty", true)
         char = {
             firstUse = true,
             covenantData = {
-                ID = 0,
+                covenantID = 0,
                 textureKit = "None",
                 celebrationSoundKit = 0,
                 animaChannelSelectSoundKit = 0,
@@ -207,7 +207,6 @@ local __LDB = LibStub("LibDataBroker-1.1"):NewDataObject("CovenantParty", {
 
     CovenantParty.frame:SetScript("OnEvent", function(self, event, ...)
         if event == "ADDON_LOADED" and CovenantParty.addonEnabled == true then
-            print(event .. " - Covenant Party!")
             local addonName = ...
             if addonName ~= CovenantPartyGlobal then
                 return
