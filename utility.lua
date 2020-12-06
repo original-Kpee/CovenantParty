@@ -9,7 +9,6 @@ CovenantParty.U = {}
 -->>  available for use
 CovenantParty.U.UTILITY_FILE_LOADED = true
 
-
 --> Beautification Functions
 do
     function CovenantParty.U.Print(text,...)
@@ -70,61 +69,71 @@ end
     end
 
 --> Group Utility
+    function CovenantParty.GetPartyMemberNames()
+        local _namesTemp = {}
+        table.foreach(CovenantParty.currentGroup, function(key,value)
+            table.insert(_namesTemp, CovenantParty.currentGroup[key]["name"])
+        end)
+        
+        return _namesTemp
+    end
+
+    function CovenantParty.GetPartyMemberCovenants()
+        local _covenantsTemp = {}
+        table.foreach(CovenantParty.currentGroup, function(key,value)
+            table.insert(_covenantsTemp, CovenantParty.currentGroup[key]["covenant"])
+        end)
+
+        return _covenantsTemp
+    end
+
+    function CovenantParty.GetPartySize()
+        return #CovenantParty.currentGroup
+    end
+
+    function CovenantParty.PrintPartyMembersNames()
+        local _names = CovenantParty.GetPartyMemberNames()
+
+        table.foreach(_names, print)
+    end
+
     function CovenantParty.U.UpdateGroupList()
         local newGroupSize, unit = GetNumGroupMembers(), "raid"
+
         if not IsInRaid() then
             newGroupSize, unit = newGroupSize - 1, "party"
         end
         
+        -- Assign the current group to the old group
+        --  If this is the first time through then currentGroup
+        --      shall be empty (nil)
         _oldGroup = CovenantParty.currentGroup
 
-        if newGroupSize < #CovenantParty.currentGroup then
-            print("------------------------\n")
-            print("Someone left the group.\n")
+        if newGroupSize == #_oldGroup then return end
 
+        if newGroupSize < #CovenantParty.currentGroup then
             if newGroupSize == 0 then
                 wipe(CovenantParty.currentGroup)
                 return
-            end
+            end        
 
-            table.foreach(_oldGroup, print)
-            print(" - - - - - - -\n")
-            print("Group size is " .. newGroupSize)
+            for oldGroupIndex, oldGroupValue in pairs(_oldGroup) do            
+                if oldGroupValue["name"] ~= GetUnitName(unit..oldGroupIndex, true) then
+                    -- Look for old group member name in new group
+                    for eachMember = 1, newGroupSize do
+                        if GetUnitName(unit..eachMember, true) == oldGroupValue["name"] then return end
+                    end                        
 
-            for indexOldGroup, nameOldGroup in ipairs(_oldGroup) do
-                print("Start Check\n\n")
-                for count = 1, newGroupSize do
-                    local partyFrameName = GetUnitName(unit..count, true)
-                    local leftGroup = true
-                    local nameThatLeft = " "
-
-                    print("Checking for " .. partyFrameName)
-                    print("... against " .. nameOldGroup .. "\n")
-
-                    if partyFrameName == nameOldGroup then
-                        print(nameOldGroup .. " is still in the group. \n\n")
-                        leftGroup = false
-                    end
-
-                    nameThatLeft = nameOldGroup
-
-                    if leftGroup == true then 
-                        print(nameThatLeft .. " is not in the group. Let's remove him.")
-                        table.foreach(CovenantParty.currentGroup, function(index, value)
-                            print("Looking at " .. index .. " index with name " .. value)
-                            if value == nameThatLeft then
-                                print(value .. " left the group.\n")
-                                table.remove(CovenantParty.currentGroup, index)
-                                return
-                            end
-                        end)
-                    end
+                    table.foreach(CovenantParty.currentGroup, function(index, value)
+                        if value["name"] == oldGroupValue["name"] then
+                            table.remove(CovenantParty.currentGroup, index)
+                            return
+                        end
+                    end)
                 end
             end
-
-            table.foreach(CovenantParty.currentGroup, print)
-            print("-------------- end ----------\n")
         end
+
         --> Checks if a new member has joined the group
         for newMember = 1, newGroupSize do
             local newMemberName = GetUnitName(unit..newMember, true)
@@ -132,16 +141,14 @@ end
 
             if newMemberName and newMemberName ~= UNKNOWN then
                 table.foreach(CovenantParty.currentGroup, function(key, value)
-                    if value == newMemberName then
+                    if CovenantParty.currentGroup[key]["name"] == newMemberName then
                         inGroup = true
                         return
                     end
                 end)
 
-                if inGroup == false then
-                    table.insert(CovenantParty.currentGroup, newMemberName)
-                    print(newMemberName .. " inserted into new group.\n")
-                    print("The new group size is " .. #CovenantParty.currentGroup)  
+                if inGroup == false then                
+                    table.insert(CovenantParty.currentGroup, {name = newMemberName, covenant = 0})
                     C_ChatInfo.SendAddonMessage(CovenantParty.MESSAGE_PREFIX, CovenantParty.MESSAGETYPE.COVENANT .."\t" .. "broadcast" .. "\t" .. CovenantPartyDB["char"]["covenantData"]["ID"], string.upper(unit))
                 end
             end

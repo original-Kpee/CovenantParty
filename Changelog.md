@@ -13,3 +13,10 @@ All notable changes to CovenantParty! World of Warcraft AddOn will be documented
     • Fixed incorrectly displaying the Targeted player covenant sigil.
     • Added PvP support. Toggling war mode will move sigil around player frame.
     • Finished party support (ready for test). Party members are able to see each other's sigils on Raid Frame style ONLY.
+
+0.1.0-a.0
+    • Added Debug Pane - this will not persist to initial release build.
+    • Fixed group tracking. It now tracks who is currently in the party.
+    • Finished messaging system. It correctly requests and parses other party member's covenants.
+    • Finished displaying of the sigils on the compact party frames.
+    • Other minor bugs were fixed.

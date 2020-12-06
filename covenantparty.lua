@@ -15,9 +15,8 @@ CovenantParty.newGroup = {}
 CovenantParty.T = {targetFrame = CreateFrame("Frame", nil, TargetFrame)}
 CovenantParty.P = {playerFrame = CreateFrame("Frame", nil, PlayerFrame)}
 CovenantParty.G = {groupFrame = CreateFrame("Frame", nil, CompactPartyFrame)}
-
+    
 --> OnEvent Frame 
-    -- CovenantParty.onEventFrame = CreateFrame("Frame", nil, UIParent)
     --> Global Frame
     CovenantParty.mainFrame = CreateFrame("Frame")
     CovenantParty.mainFrame:SetScript("OnEvent", function(self, event,...)
@@ -26,16 +25,19 @@ CovenantParty.G = {groupFrame = CreateFrame("Frame", nil, CompactPartyFrame)}
             
             if IsInGroup() and _joinedGroup == false then
                 CovenantParty:CreateCovenantSigil("party", CovenantPartyDB["char"]["covenantData"]["ID"], CompactPartyFrameMember1) 
-                _joinedGroup = true
+                _joinedGroup = true                
+
+                CovenantParty.ShowDebugFrame()
             end   
 
             if not IsInGroup() then
-                print("You are not in a group.")
                 _joinedGroup = false
-                return
+                CovenantParty.HideDebugFrame()
             end
             
             CovenantParty.U.UpdateGroupList()
+
+            CovenantParty.ReWriteTextOnDebugFrame({"Party Member Names: ", CovenantParty.GetPartyMemberNames()}) 
 
         elseif event == "COVENANT_CHOSEN" then
             --> During initalization the AddOn discovered that
@@ -89,6 +91,8 @@ CovenantParty.G = {groupFrame = CreateFrame("Frame", nil, CompactPartyFrame)}
 
             CovenantParty:CreateCovenantSigil(UnitName("player"), CovenantPartyDB["char"]["covenantData"]["ID"], PlayerFrame)
 
+            CovenantParty:ConfigureDebugFrame()
+
             if UnitIsPVP("player") then
                 CovenantParty.P["texture"]:SetPoint("CENTER", PlayerFrame, "CENTER", CovenantParty.PlayerFrameLocationPvP[1], CovenantParty.PlayerFrameLocationPvP[2])
             else
@@ -113,6 +117,7 @@ CovenantParty.G = {groupFrame = CreateFrame("Frame", nil, CompactPartyFrame)}
             -->> CovenantParty.M.messageType, CovenantParty.M.payload
             if prefix and CovenantParty.M.messageAddonPrefix[prefix] then
                 local _, payload = CovenantParty.U.ParseAddOnMsg(message, distribution_type, sender)
+
                 if distribution_type == "WHISPER" then
                     if payload then
                         if _currentTarget ~= strsplit("-", sender) then 
@@ -123,27 +128,33 @@ CovenantParty.G = {groupFrame = CreateFrame("Frame", nil, CompactPartyFrame)}
                     end 
 
                 elseif distribution_type == "PARTY" or distribution_type == "INSTANCE" then
+                    local _senderName, _senderRealm = strsplit("-", sender)
 
-                    if strsplit("-", sender) == UnitName("player") then  
+                    if _senderName == UnitName("player") then  
                         CovenantParty:CreateCovenantSigil("party", payload, CompactPartyFrameMember1)                        
                     else
+                        table.foreach(CovenantParty.currentGroup, function(key, value)                                                        
+                            if CovenantParty.currentGroup[key]["name"] == _senderName then
+                              
+                                CovenantParty.currentGroup[key]["covenant"] = payload
+                                
+                                local _currentyPartyMemberIndexCount = key + 1
 
-                        if countPartyFrame == 2 then
-                            CovenantParty:CreateCovenantSigil("party", payload, CompactPartyFrameMember2)
-                        elseif countPartyFrame == 3 then
-                            CovenantParty:CreateCovenantSigil("party", payload, CompactPartyFrameMember3)
-                        elseif countPartyFrame == 4 then
-                            CovenantParty:CreateCovenantSigil("party", payload, CompactPartyFrameMember4)
-                        elseif countPartyFrame == 5 then
-                            CovenantParty:CreateCovenantSigil("party", payload, CompactPartyFrameMember5)
-                        end
-
-                        CovenatParty.currentGroup[sender]["covenantID"] = payload
-
-                        countPartyFrame = countPartyFrame + 1
+                                if _currentyPartyMemberIndexCount == 2 then
+                                    CovenantParty:CreateCovenantSigil("party", payload, CompactPartyFrameMember2)
+                                elseif _currentyPartyMemberIndexCount == 3 then
+                                    CovenantParty:CreateCovenantSigil("party", payload, CompactPartyFrameMember3)
+                                elseif _currentyPartyMemberIndexCount == 4 then
+                                    CovenantParty:CreateCovenantSigil("party", payload, CompactPartyFrameMember4)
+                                elseif _currentyPartyMemberIndexCount == 5 then
+                                    CovenantParty:CreateCovenantSigil("party", payload, CompactPartyFrameMember5)
+                                end
+                            end                            
+                        end)
                     end
                 end
             end
+
         elseif event == "PLAYER_TARGET_CHANGED" then
             _previewsTarget = _currentTarget
             _currentTarget = UnitName("target")
@@ -153,19 +164,26 @@ CovenantParty.G = {groupFrame = CreateFrame("Frame", nil, CompactPartyFrame)}
             end
 
             if UnitExists("target") and UnitIsPlayer("target") and UnitFactionGroup("target") == UnitFactionGroup("player") then
-                local targetName = UnitName("target")
-                C_ChatInfo.SendAddonMessage(CovenantParty.MESSAGE_PREFIX, CovenantParty.MESSAGETYPE["COVENANT"] .. "\t" .. "request", "WHISPER", targetName)
+                local targetName, targetRealm = UnitName("target")
+                if targetRealm == nil then
+                    C_ChatInfo.SendAddonMessage(CovenantParty.MESSAGE_PREFIX, CovenantParty.MESSAGETYPE["COVENANT"] .. "\t" .. "request", "WHISPER", targetName)
+                else
+                    C_ChatInfo.SendAddonMessage(CovenantParty.MESSAGE_PREFIX, CovenantParty.MESSAGETYPE["COVENANT"] .. "\t" .. "request", "WHISPER", targetName .. "-" .. targetRealm)
+                end
+                
             elseif not UnitExists("target") then
                 if CovenantParty.T["texture"] ~= nil then CovenantParty.T["texture"]:Hide() end
             end
-        elseif event == "PLAYER_FLAGS_CHANGED" then
-            if UnitIsPVP("player") then
-                CovenantParty.P["texture"]:SetPoint("CENTER", PlayerFrame, "CENTER", CovenantParty.PlayerFrameLocationPvP[1], CovenantParty.PlayerFrameLocationPvP[2])
-            else
-                -- Move Covenant icon where PvP icon used to be
-                CovenantParty.P["texture"]:SetPoint("CENTER", PlayerFrame, "CENTER", CovenantParty.PlayerFrameLocation[1], CovenantParty.PlayerFrameLocation[2])
-            end
-        end
+
+        elseif event == "PLAYER_FLAGS_CHANGED" or event == "PLAYER_ENTERING_WORLD" then
+            
+            if IsInGroup() and _joinedGroup == false then
+                CovenantParty:CreateCovenantSigil("party", CovenantPartyDB["char"]["covenantData"]["ID"], CompactPartyFrameMember1) 
+                _joinedGroup = true
+            end       
+
+            CovenantParty:UpdatePlayerFrameSigil()
+        end 
     end
     )
 
@@ -227,9 +245,8 @@ CovenantParty.G = {groupFrame = CreateFrame("Frame", nil, CompactPartyFrame)}
             CovenantParty.T["texture"]:SetHeight(height)
             CovenantParty.T["texture"]:SetWidth(width)
             CovenantParty.T["texture"]:SetAtlas(covenantAtlas)
-        elseif playerIndex == "party" then         
+        elseif playerIndex == "party" then      
             if CovenantParty.G[string.lower(tostring(relativeFrame))] == nil or CovenantParty.G[string.lower(tostring(relativeFrame))]["active"] == false then
-                print("Generating texture for " .. string.lower(tostring(relativeFrame)))
                 CovenantParty.G[string.lower(tostring(relativeFrame))] = CovenantParty.G.groupFrame:CreateTexture("Sigil", "ARTWORK", relativeFrame)
                 CovenantParty.G.groupFrame:SetParent(CompactPartyFrame)
                 CovenantParty.G.groupFrame:SetFrameStrata(HIGH)
@@ -243,6 +260,101 @@ CovenantParty.G = {groupFrame = CreateFrame("Frame", nil, CompactPartyFrame)}
         end
     end
 
+    function CovenantParty:RemoveCompactPartyFrameSigil(frame)
+        print(type(frame))
+        if type(frame) == "string" and frame == "all" then
+            for i = 1, CovenantParty.GetPartySize() do
+                if _currentyPartyMemberIndexCount == 1 then                    
+                    CovenantParty.G[CompactPartyFrameMember2]:SetAtlas(nil)
+                elseif _currentyPartyMemberIndexCount == 2 then
+                    CovenantParty.G[CompactPartyFrameMember3]:SetAtlas(nil)
+                elseif _currentyPartyMemberIndexCount == 3 then
+                    CovenantParty.G[CompactPartyFrameMember4]:SetAtlas(nil)
+                elseif _currentyPartyMemberIndexCount == 4 then
+                    CovenantParty.G[CompactPartyFrameMember5]:SetAtlas(nil)
+                end
+            end
+        else
+        end
+    end
+
+    function CovenantParty:UpdatePlayerFrameSigil()
+        if UnitIsPVP("player") then
+            CovenantParty.P["texture"]:SetPoint("CENTER", PlayerFrame, "CENTER", CovenantParty.PlayerFrameLocationPvP[1], CovenantParty.PlayerFrameLocationPvP[2])
+        else
+            -- Move Covenant icon where PvP icon used to be
+            CovenantParty.P["texture"]:SetPoint("CENTER", PlayerFrame, "CENTER", CovenantParty.PlayerFrameLocation[1], CovenantParty.PlayerFrameLocation[2])
+        end
+    end
+
+--> Frames
+    function CovenantParty:ConfigureDebugFrame()
+        --> Debug Frame
+        CovenantParty.debugFrame = CreateFrame("Frame", "CovenantParty! Debug Frame", UIParent, BackdropTemplateMixin and "BackdropTemplate")
+        CovenantParty.debugFrame:EnableMouse(true)
+        CovenantParty.debugFrame:SetMovable(true)
+        CovenantParty.debugFrame:RegisterForDrag("LeftButton")
+        CovenantParty.debugFrame:SetWidth(150)
+        CovenantParty.debugFrame:SetHeight(200)
+        CovenantParty.debugFrame:SetAlpha(.90)
+        CovenantParty.debugFrame:SetPoint("CENTER", 650, -100)
+        CovenantParty.debugFrame.text = CovenantParty.debugFrame:CreateFontString(nil, "ARTWORK")
+        CovenantParty.debugFrame.text:SetFont("Fonts\\ARIALN.ttf", 13, "OUTLINE")
+        CovenantParty.debugFrame.text:SetPoint("CENTER", 0,0)
+        CovenantParty.debugFrame:SetBackdrop({
+            bgFile = "Interface/Tooltips/UI-Tooltip-Background",
+            edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
+            edgeSize = 16,
+            insets = { left = 4, right = 4, top = 4, bottom = 4 },
+        })
+        CovenantParty.debugFrame:SetBackdropColor(0, 0, 1, .5)
+        CovenantParty.debugFrame:SetScript("OnDragStart", CovenantParty.debugFrame.StartMoving)
+        CovenantParty.debugFrame:SetScript("OnDragStop", CovenantParty.debugFrame.StopMovingOrSizing)
+
+        CovenantParty.debugFrame:Hide()
+    end
+
+    function CovenantParty.ReWriteTextOnDebugFrame(...)
+        local _arg = {...}
+        local _displayableText = {}
+
+        if _arg then
+            for i,v in ipairs(_arg) do
+                if type(v) == "table" then
+                    for ii, vv in ipairs(v) do
+                        if type(vv) == "table" then
+                            for iii, vvv in ipairs(vv) do
+                                table.insert(_displayableText, vvv)
+                                -- CovenantParty.debugFrame.text:SetText(vvv .. "\n")
+                            end
+                        else
+                            table.insert(_displayableText, vv)
+                            -- CovenantParty.debugFrame.text:SetText(vv .. "\n")
+                        end
+                    end
+                else
+                    table.insert(_displayableText, v)
+                    -- CovenantParty.debugFrame.text:SetText(v .. "\n")
+                end
+            end
+            local _tempDisplayableText = ""
+
+            table.foreach(_displayableText, function(i, v)
+                _tempDisplayableText = _tempDisplayableText .. "\n" .. v 
+                CovenantParty.debugFrame.text:SetText(_tempDisplayableText)                
+            end)
+        end
+    end
+
+    function CovenantParty:HideDebugFrame()
+        CovenantParty.ReWriteTextOnDebugFrame(" ")
+        CovenantParty.debugFrame:Hide()
+    end
+
+    function CovenantParty:ShowDebugFrame()
+        CovenantParty.debugFrame:Show()
+    end
+
 --> Register Events
     CovenantParty.mainFrame:RegisterEvent("PLAYER_LOGIN")
     CovenantParty.mainFrame:RegisterEvent("COVENANT_CHOSEN")
@@ -250,3 +362,5 @@ CovenantParty.G = {groupFrame = CreateFrame("Frame", nil, CompactPartyFrame)}
     CovenantParty.mainFrame:RegisterEvent("CHAT_MSG_ADDON")
     CovenantParty.mainFrame:RegisterEvent("PLAYER_TARGET_CHANGED")
     CovenantParty.mainFrame:RegisterEvent("PLAYER_FLAGS_CHANGED")
+    CovenantParty.mainFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
+
